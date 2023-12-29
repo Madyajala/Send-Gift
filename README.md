@@ -1,481 +1,104 @@
-# Send Gift API Documentation
+[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-718a45dd9cf7e7f842a935f5ebbe5719a5e09af4491e668f4dbf3b35d5cca122.svg)](https://github.com/Madyajala/Send-Gift.git)
+# FSJSP2S5-LC01 - Hacktiv Gift
 
-## Models
+## Ringkasan
 
-### User
+Kali ini, Kalian sedang bekerja di sebuah perusahaan agency dan kalian ditugaskan untuk membuat aplikasi bernama `Hacktiv Gift`, sebuah web server node.js untuk membantu menampilkan list gift voucher. Feature utama dari aplikasi ini adalah:
 
-```md
-- email : string, required, unique, isEmail
-- password : string, required
-```
+1. Dapat `menampilkan seluruh gift voucher`
+2. User dapat `memberikan gift` voucher kepada user lain
+3. User yang menerima voucher dapat melakukan `claim` terhadap voucher tersebut
 
-### Voucher
 
-```md
-- title : string, required
-- tag : string, required
-- imageUrl : string, required
-```
+## Setup Project
 
-### Gift
+Lakukan setup project dengan menginstall package yang sudah diajarkan sebelumnya dan buatlah error handling (global error), skema database sesuai dengan `api_doc.md`. Terdapat 3 Model pada project ini:
 
-```md
-- message : string, required
-- senderId : integer, required (id pengirim)
-- amount : integer, (default: 0)
-- voucherId: integer, required
-- receiverId : integer, required (id penerima)
-- status : string (default: 'unclaimed', kalau sudah diclaim maka jadi 'claimed')
-```
+1. Table User
+2. Table Voucher
+3. Table Gift
 
-## Relationship
+Catatan:
+Perhatikan relasi antara `User`, `Gift`, dan `Voucher` dan gunakan definisi relasi yang sesuai pada sequelize relation [doc](https://sequelize.org/master/manual/advanced-many-to-many.html).
 
-### Many-to-Many
+## Authentication: Register
 
-Perhatikan relasi antara `User`, `Gift`, dan `Voucher` gunakan definisi relasi yang sesuai pada sequelize relation [doc](https://sequelize.org/master/manual/advanced-many-to-many.html).
+Buatlah sebuah endpoint yang digunakan untuk menambahkan User ke dalam aplikasi dengan detail sebagai berikut:
 
-## Endpoints
+- Buatlah routing: `POST /register`
+- Menerima request body, status code, response success dan response error sesuai `api_doc.md` no. 1
+- Pastikan, password di hash menggunakan `bcrypt` sebelum di simpan dalam database
 
-List of available endpoints:
+## Authentication: Login
 
-- `POST /register`
-- `POST /login`
+Buatlah sebuah endpoint yang digunakan untuk authentication User dengan detail sebagai berikut:
 
-Routes below need authentication:
+- Buatlah routing: `POST /login`
+- Menerima request body, status code, response success dan response error sesuai `api_doc.md` no. 2
+- Membuat token menggunakan `jsonwebtoken`
 
-- `GET /vouchers`
-- `POST /gifts/:voucherId`
-- `GET /gifts`
+## Fetch Vouchers
 
-Routes below need authentication & authorization:
+Buatlah sebuah endpoint untuk valid user yang digunakan untuk mendapatkan semua list voucher pada aplikasi dengan detail sebagai berikut:
 
-- `PATCH /gifts/:id`
-- `DELETE /gifts/:id`
-- `PATCH /gifts/:id/claim`
+- Buatlah routing: `GET /vouchers`
+- Menerima headers, status code, response success dan response error (global error) sesuai `api_doc.md` no. 3
+- Authentication Check: melakukan pengecekan apakah User tersebut valid sebelum request endpoint
 
-## 1. POST /register
+Catatan:
+> Untuk initial data atau data awal voucher, lakukan seeding sesuai dengan data json yang sudah diberikan bernama `voucher.json`
 
-Request
+## Send Voucher (Create Gift)
 
-- body:
+Buatlah sebuah endpoint untuk valid user yang digunakan untuk melakukan pengiriman voucher dari `Valid User A` ke `Valid User B` pada aplikasi dengan detail sebagai berikut:
 
-```json
-{
-  "email": "string",
-  "password": "string"
-}
-```
+- Buatlah routing: `POST /gifts/:voucherId`
+- Menerima headers, params, body, status code, response success dan response error (+global error) sesuai `api_doc.md` no. 4
+- Authentication Check: melakukan pengecekan apakah User tersebut valid sebelum request endpoint
+- Default value Model Gift: status: `unclaimed` & amount: `0`
 
-Response (201 - Created)
+## Fetch Gifts (Current User)
 
-```json
-{
-  "id": "integer",
-  "email": "string"
-}
-```
-
-Response (400 - Bad Request)
-
-```json
-{
-  "message": "Email is required"
-}
-OR
-{
-  "message": "Invalid email format"
-}
-OR
-{
-  "message": "Email must be unique"
-}
-OR
-{
-  "message": "Password is required"
-}
-```
+Buatlah sebuah endpoint untuk valid user yang digunakan user tersebut untuk mendapatkan seluruh gift yang user terima dengan detail sebagai berikut:
 
-## 2. POST /login
+- Buatlah routing: `GET /gifts`
+- Menerima headers, status code, response success dan response error (global error) sesuai `api_doc.md` no. 5
+- Authentication Check: melakukan pengecekan apakah User tersebut valid sebelum request endpoint
+- Authorization Check: Pastikan, data yang ditampilkan HANYA data user yang sedang login, bukan semua data (recipient's ownership)
 
-Request
+## Update Gifts
 
-- body:
-
-```json
-{
-  "email": "string",
-  "password": "string"
-}
-```
-
-Response (200 - OK)
-
-```json
-{
-  "access_token": "string"
-}
-```
-
-Response (400 - Bad Request)
-
-```json
-{
-  "message": "Email is required"
-}
-OR
-{
-  "message": "Password is required"
-}
-```
-
-Response (401 - Unauthorized)
-
-```json
-{
-  "message": "Invalid email/password"
-}
-```
-
-## 3. GET /vouchers
-
-Description:
-
-- Fetch all vouchers from database
-
-Request
-
-- headers:
-
-```json
-{
-  "Authorization": "Bearer <string token>"
-}
-```
-
-Response (200 - OK)
-
-```json
-[
-  {
-    "id": 1,
-    "title": "Thank You Gift Voucher",
-    "tag": "general",
-    "imageUrl": "https://cdn.dribbble.com/users/416805/screenshots/15604755/media/f279c6ce7d2ef61fe1b301ce6f1cd509.jpg?compress=1&resize=1600x1200"
-  },
-  {
-    "id": 2,
-    "title": "Christmas Gift Voucher",
-    "tag": "christmas",
-    "imageUrl": "https://cdn.dribbble.com/users/4540442/screenshots/9126525/media/0abbd18b7aa27a9835ae2f6ea4d61371.png?compress=1&resize=1600x1200"
-  },
-  {
-    "id": 3,
-    "title": "Christmas Gift Voucher 2",
-    "tag": "christmas",
-    "imageUrl": "https://cdn.dribbble.com/users/322873/screenshots/9152565/media/d2a7e512056ae61e1cb67d7b8d251ca5.jpg?compress=1&resize=1600x1200"
-  },
-  ...,
-]
-```
-
-## 4. POST /gifts/:voucherId
-
-Description:
-
-- send voucher to other user. default status untuk gift adalah 'unclaimed' dan amount adalah 0
-
-### Request
-
-- headers:
-
-```json
-{
-  "Authorization": "Bearer <string token>"
-}
-```
-
-- params:
-
-```json
-{
-  "voucherId": "integer"
-}
-```
-
-- body:
-
-```json
-{
-  "message": "Happy Birthday My Friend",
-  "amount" : "",
-  "receiverId": 2
-}
-```
-
-Response (201 - Created)
-
-```json
-{
-  "id": 2,
-  "message": "Happy Birthday My Friend",
-  "senderId": 1,
-  "amount": 0,
-  "voucherId": 1,
-  "receiverId": 2,
-  "status": "unclaimed"
-}
-```
-
-Response (400 - Bad Request)
-
-```json
-{
-  "message": "Message is required"
-}
-```
-
-Response (404 - Not Found)
-
-```json
-{
-  "message": "Data not found"
-}
-```
-
-## 5. GET /gifts
-
-Description:
-
-- Get current user gifts (recipient's ownership)
-
-Request
-
-- headers:
-
-```json
-{
-  "Authorization": "Bearer <string token>"
-}
-```
-
-Response (200 - OK)
-
-```json
-[
-  {
-    "id": 2,
-    "message": "Happy Birthday My Friend",
-    "senderId": 1,
-    "amount": 0,
-    "voucherId": 1,
-    "receiverId": 2,
-    "status": "unclaimed",
-    "voucher": {
-      "id": 1,
-      "title": "Thank You Gift Voucher",
-      "imageUrl": "https://cdn.dribbble.com/users/416805/screenshots/15604755/media/f279c6ce7d2ef61fe1b301ce6f1cd509.jpg?compress=1&resize=1600x1200"
-    }
-  }
-]
-```
-
-## 6. PATCH /gifts/:id
-
-Description:
-
-- Update gift amount and gift messages, return updated data
-- Authorization : sender's ownership
-
-Request
-
-- headers:
-
-```json
-{
-  "Authorization": "Bearer <string token>"
-}
-```
-
-- params:
-
-```json
-{
-  "id": "integer"
-}
-```
-
-- body:
-
-```json
-{
-  "message": "Happy Wedding My Friend",
-  "amount": 500000,
-  "receiverId": 2
-}
-```
-
-Response (200 - OK)
-
-```json
-{
-  "id": 2,
-  "message": "Happy Wedding My Friend",
-  "senderId": 1,
-  "amount": 500000,
-  "voucherId": 1,
-  "receiverId": 2,
-  "status": "unclaimed"
-}
-```
-
-Response (400 - Bad Request)
-
-```json
-{
-  "message": "Message is required"
-}
-OR
-{
-  "message": "receiverId is required"
-}
-```
-
-Response (404 - Not Found)
-
-```json
-{
-  "message": "Data not found"
-}
-```
-
-Response (403 - Not Found)
-
-```json
-{
-  "message": "You're not authorized"
-}
-```
-
-## 7. DELETE /gifts/:id
-
-Description:
-
-- Delete Gift
-- Authorization : sender's ownership
-
-Request
-
-- headers:
-
-```json
-{
-  "Authorization": "Bearer <string token>"
-}
-```
-
-- params:
-
-```json
-{
-  "id": "integer"
-}
-```
-
-Response (200 - OK)
-
-```json
-{
-  "message": "Gift has been deleted"
-}
-```
-
-Response (404 - Not Found)
-
-```json
-{
-  "message": "Data not found"
-}
-```
-
-Response (403 - Not Found)
-
-```json
-{
-  "message": "You're not authorized"
-}
-```
-
-## 8. PATCH /gifts/:id/claim
-
-Description:
-
-- Claim gift and update status to claimed 
-- Authorization : recipient's ownership
-
-Request
-
-- headers:
-
-```json
-{
-  "Authorization": "Bearer <string token>"
-}
-```
-
-- params:
-
-```json
-{
-  "id": "integer"
-}
-```
-
-Response (200 - OK)
-
-```json
-{
-  "message": "Gift has been claimed"
-}
-```
-
-Response (404 - Not Found)
-
-```json
-{
-  "message": "Data not found"
-}
-```
-
-Response (403 - Not Found)
-
-```json
-{
-  "message": "You're not authorized"
-}
-```
-
-## Global Error
-
-Response (401 - Unauthorized)
-
-```json
-{
-  "message": "Invalid token"
-}
-```
-
-Response (403 - Forbidden)
-
-```json
-{
-  "message": "You are not authorized"
-}
-```
-
-Response (500 - Internal Server Error)
-
-```json
-{
-  "message": "Internal server error"
-}
-```
+Buatlah sebuah endpoint untuk valid user yang digunakan user tersebut untuk merubah atau mengupdate `gift amount` dan `gift message` yang sudah dibuat dengan detail sebagai berikut:
+
+- Buatlah routing: `PATCH /gifts/:id`
+- Menerima headers, params, body, status code, response success dan response error (global error) sesuai `api_doc.md` no. 6
+- Authentication Check: melakukan pengecekan apakah User tersebut valid sebelum request endpoint
+- Authorization Check: Pastikan, data yang diubah hanya data yang dibuat oleh user tersebut (sender's ownership)
+
+## Delete Gifts
+
+Buatlah sebuah endpoint untuk valid user yang digunakan user tersebut untuk menghapus gift yang pernah dibuat dengan detail sebagai berikut:
+
+- Buatlah routing: `DELETE /gifts/:id`
+- Menerima headers, params, status code, response success dan response error (global error) sesuai `api_doc.md` no. 7
+- Authentication Check: melakukan pengecekan apakah User tersebut valid sebelum request endpoint
+- Authorization Check: data yang dihapus hanya data yang dibuat oleh user tersebut (sender's ownership)
+
+## Claim Gift
+
+Buatlah sebuah endpoint untuk valid user yang digunakan user tersebut untuk meng-claim gift yang dia dapat dengan detail sebagai berikut:
+
+- Buatlah routing: `PATCH /gifts/:id/claim`
+- Menerima headers, params, status code, response success dan response error (global error) sesuai `api_doc.md` no. 8
+- Authentication Check: melakukan pengecekan apakah User tersebut valid sebelum request endpoint
+- Authorization Check: data yang di-claim hanya data yang diberikan kepada user tersebut (recipient's ownership)
+
+## Testing
+
+Pastikan semua release yang sudah dikerjakan sesuai dengan testing yang sudah dibuat. Lakukan `testing` dengan langkah berikut:
+
+- Drop db testing: `sequelize --env test db:drop`
+- Create db testing: `sequelize --env test db:create`
+- Migrate db testing: `sequelize --env test db:migrate`
+- Ketika run test buatlah `bin/www` untuk menjalankan aplikasi express, pada file `app.js` lakukan `module.exports = app`
+- Pada package.json tambahkan script `"test": "jest --runInBand --forceExit"`
