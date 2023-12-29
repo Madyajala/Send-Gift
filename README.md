@@ -1,9 +1,9 @@
 [![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-718a45dd9cf7e7f842a935f5ebbe5719a5e09af4491e668f4dbf3b35d5cca122.svg)](https://github.com/Madyajala/Send-Gift.git)
-# FSJSP2S5-LC01 - Hacktiv Gift
+# Send Gift
 
 ## Ringkasan
 
-Kali ini, Kalian sedang bekerja di sebuah perusahaan agency dan kalian ditugaskan untuk membuat aplikasi bernama `Hacktiv Gift`, sebuah web server node.js untuk membantu menampilkan list gift voucher. Feature utama dari aplikasi ini adalah:
+Membuat aplikasi bernama `Send Gift`, sebuah web server node.js untuk membantu menampilkan list gift voucher. Feature utama dari aplikasi ini adalah:
 
 1. Dapat `menampilkan seluruh gift voucher`
 2. User dapat `memberikan gift` voucher kepada user lain
