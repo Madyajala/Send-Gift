@@ -1,0 +1,26 @@
+{
+  "name": "lc01-madyajala",
+  "version": "1.0.0",
+  "description": "[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-718a45dd9cf7e7f842a935f5ebbe5719a5e09af4491e668f4dbf3b35d5cca122.svg)](https://classroom.github.com/online_ide?assignment_repo_id=13133734&assignment_repo_type=AssignmentRepo)\r # FSJSP2S5-LC01 - Hacktiv Gift",
+  "main": "app.js",
+  "scripts": {
+    "test": "jest --runInBand --forceExit",
+    "start": "npx nodemon bin/www"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.11.3",
+    "sequelize": "^6.35.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "sequelize-cli": "^6.6.2",
+    "supertest": "^6.3.3"
+  }
+}
